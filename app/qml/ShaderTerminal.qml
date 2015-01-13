@@ -26,7 +26,8 @@ ShaderEffect {
     property ShaderEffectSource blurredSource
     property ShaderEffectSource bloomSource
 
-    property real liveBlur: blurredSource && blurredSource.live ? 1.0 : 0.0
+    property int blurPhase: blurredSource && blurredSource.blurPhase ? blurredSource.blurPhase : 0
+    property real liveBlur: blurPhase > 0 ? 1.0 : 0.0
 
     property color fontColor: appSettings.fontColor
     property color backgroundColor: appSettings.backgroundColor
@@ -63,8 +64,17 @@ ShaderEffect {
     property size virtual_resolution
 
     TimeManager{
+        property bool updateBlur: blurPhase == 2
         id: timeManager
         enableTimer: terminalWindow.visible
+
+        onUpdateBlurChanged: {
+            if (updateBlur) {
+                timeManager.timeChanged.connect(blurredSource.scheduleUpdate);
+            } else {
+                timeManager.timeChanged.disconnect(blurredSource.scheduleUpdate);
+            }
+        }
     }
 
     property alias time: timeManager.time

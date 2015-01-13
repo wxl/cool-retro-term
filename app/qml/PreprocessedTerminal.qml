@@ -45,10 +45,11 @@ Item{
     anchors.bottomMargin: frame.displacementBottom * appSettings.windowScaling
 
     //The blur effect has to take into account the framerate
+    property real fps: appSettings.fps != 0 ? appSettings.fps : 60
     property real mBlur: Math.sqrt(appSettings.burnIn)
     property real motionBlurCoefficient: Utils.lint(_minBlurCoefficient, _maxBlurCoefficient, mBlur)
     property real _minBlurCoefficient: 0.2
-    property real _maxBlurCoefficient: 0.02
+    property real _maxBlurCoefficient: 0.01
 
     property size terminalSize: kterminal.terminalSize
     property size fontMetrics: kterminal.fontMetrics
@@ -231,35 +232,56 @@ Item{
         active: mBlur !== 0
 
         sourceComponent: ShaderEffectSource{
+            property int blurPhase: 0
+            property real blurFps: blurredSource.blurPhase === 1 ? 60 : terminalContainer.fps
+
             id: _blurredSourceEffect
             sourceItem: blurredTerminalLoader.item
             recursive: true
-            live: true
+            live: blurPhase == 1
             hideSource: true
             wrapMode: kterminalSource.wrapMode
 
             visible: false
 
-            function restartBlurSource(){
-                livetimer.restart();
+            // The new burnIn effect is in three phases:
+            //
+            // 0) Disabled: The recursive effect is not updated saving time and power.
+            // 1) Active: The recursive shader is live, updating as fast as possible so that
+            //    no frames are skipped.
+            // 3) Slow Active: The recursive shader is updated through the effect timer,
+            //    considerably reducing the load.
+
+            Timer{
+                id: shortTimer
+                interval: 80 // This value might require some tweawing.
+                onTriggered: {
+                    _blurredSourceEffect.blurPhase = 2;
+                    longTimer.restart();
+                }
             }
 
             Timer{
-                id: livetimer
+                id: longTimer
 
                 // The interval assumes 60 fps. This is the time needed burnout a white pixel.
                 // We multiply 1.1 to have a little bit of margin over the theoretical value.
                 // This solution is not extremely clean, but it's probably the best to avoid measuring fps.
 
-                interval: (1 / motionBlurCoefficient) * 60 * 1.1
-                running: true
-                onTriggered: _blurredSourceEffect.live = false;
+                interval: (1 / motionBlurCoefficient) * blurFps * 1.1
+                onTriggered: _blurredSourceEffect.blurPhase = 0;
             }
+
+            function restartBlurSource(){
+                longTimer.restart();
+            }
+
             Connections{
                 target: kterminal
                 onImagePainted:{
-                    _blurredSourceEffect.live = true;
-                    livetimer.restart();
+                    longTimer.stop();
+                    _blurredSourceEffect.blurPhase = 1;
+                    shortTimer.restart();
                 }
             }
             // Restart blurred source settings change.
@@ -295,7 +317,7 @@ Item{
         sourceComponent: ShaderEffect {
             property variant txt_source: kterminalSource
             property variant blurredSource: blurredSourceLoader.item
-            property real blurCoefficient: motionBlurCoefficient
+            property real blurCoefficient: motionBlurCoefficient * 60 / blurredSource.blurFps
 
             blending: false
 
