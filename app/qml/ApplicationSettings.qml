@@ -66,6 +66,8 @@ QtObject{
     property real bloomQuality: 0.5
     property real burnInQuality: 0.5
 
+    property real longBurnIn: 0.5
+
     property real chromaColor: 0.0
     property real saturationColor: 0.0
 
@@ -81,6 +83,12 @@ QtObject{
     readonly property int pixel_rasterization: 2
 
     property int rasterization: no_rasterization
+
+    // CONSTANTS //////////////////////////////////////////////////////////////
+
+    readonly property real longBurnInSamplingInterval: 10000
+    readonly property real longBurnInIncrement: 0.013
+    readonly property real longBurnInDecay: 0.005
 
     // FONTS //////////////////////////////////////////////////////////////////
 
@@ -240,7 +248,8 @@ QtObject{
             ambientLight: ambientLight,
             windowOpacity: windowOpacity,
             fontName: fontNames[rasterization],
-            fontWidth: fontWidth
+            fontWidth: fontWidth,
+            longBurnIn: longBurnIn
         }
         return settings;
     }
@@ -327,6 +336,8 @@ QtObject{
 
         fontNames[rasterization] = settings.fontName !== undefined ? settings.fontName : fontNames[rasterization];
         fontWidth = settings.fontWidth !== undefined ? settings.fontWidth : fontWidth;
+
+        longBurnIn = settings.longBurnIn !== undefined ? settings.longBurnIn : longBurnIn;
 
         handleFontChanged();
     }

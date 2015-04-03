@@ -14,6 +14,8 @@ ShaderTerminal{
 
     source: terminal.mainSource
     blurredSource: terminal.blurredSource
+    longBurnInSource: terminal.longBurnInSource
+
     dispX: (12 / width) * appSettings.windowScaling
     dispY: (12 / height) * appSettings.windowScaling
     virtual_resolution: terminal.virtualResolution

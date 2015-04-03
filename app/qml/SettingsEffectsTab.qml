@@ -40,6 +40,11 @@ Tab{
                 value: appSettings.burnIn
             }
             CheckableSlider{
+                name: qsTr("Long BurnIn")
+                onNewValue: appSettings.longBurnIn = newValue
+                value: appSettings.longBurnIn
+            }
+            CheckableSlider{
                 name: qsTr("Static Noise")
                 onNewValue: appSettings.staticNoise = newValue
                 value: appSettings.staticNoise

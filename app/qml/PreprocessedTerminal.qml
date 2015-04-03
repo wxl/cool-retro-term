@@ -32,6 +32,7 @@ Item{
     property alias mainTerminal: kterminal
     property ShaderEffectSource mainSource: kterminalSource
     property ShaderEffectSource blurredSource: blurredSourceLoader.item
+    property ShaderEffectSource longBurnInSource: longBurnInSourceLoader.item
 
     property real fontWidth: 1.0
     property real screenScaling: 1.0
@@ -340,4 +341,85 @@ Item{
             onStatusChanged: if (log) console.log(log) //Print warning messages
         }
     }
+
+    Loader{
+        id: longBurnInSourceLoader
+        asynchronous: true
+        active: appSettings.longBurnIn !== 0
+
+        sourceComponent: ShaderEffectSource{
+            property bool updateBurnIn: false
+
+            id: _longBurnInSource
+            sourceItem: longBurnInEffectLoader.item
+            recursive: true
+            live: false
+            wrapMode: kterminalSource.wrapMode
+            hideSource: true
+
+            visible: false
+
+            Timer {
+                id: updateLongBlurTimer
+                interval: appSettings.longBurnInSamplingInterval
+                running: true
+                repeat: true
+                onTriggered: {
+                    _longBurnInSource.scheduleUpdate();
+                }
+            }
+        }
+    }
+
+    Loader{
+        id: longBurnInEffectLoader
+
+        width: kterminal.width
+        height: kterminal.height
+
+        active: appSettings.longBurnIn !== 0
+        asynchronous: true
+
+        visible: false
+
+        sourceComponent: ShaderEffect {
+            property variant txt_source: kterminalSource
+            property variant longBurnInSource: longBurnInSourceLoader.item
+            property real decayCoefficient: appSettings.longBurnInDecay
+            property real burnInIncrement: appSettings.longBurnInIncrement
+
+            blending: false
+            visible: false
+
+            fragmentShader:
+                "#ifdef GL_ES
+                    precision mediump float;
+                #endif\n" +
+
+                "uniform lowp float qt_Opacity;" +
+                "uniform lowp sampler2D txt_source;" +
+
+                "varying highp vec2 qt_TexCoord0;
+
+                 uniform lowp sampler2D longBurnInSource;
+                 uniform highp float decayCoefficient;
+                 uniform highp float burnInIncrement;" +
+
+                "float rgb2grey(vec3 v){
+                    return dot(v, vec3(0.21, 0.72, 0.04));
+                }" +
+
+                "void main() {" +
+                    "vec2 coords = qt_TexCoord0;" +
+                    "vec3 origColor = texture2D(txt_source, coords).rgb;" +
+                    "vec3 blur_color = texture2D(longBurnInSource, coords).rgb - vec3(decayCoefficient);" +
+                    "vec3 color = min(blur_color + origColor * burnInIncrement, max(blur_color, origColor));" +
+
+                    "gl_FragColor = vec4(color, 1.0);" +
+                "}"
+
+            onStatusChanged: if (log) console.log(log) //Print warning messages
+        }
+    }
+
 }

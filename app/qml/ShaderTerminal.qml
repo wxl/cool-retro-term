@@ -27,12 +27,14 @@ ShaderEffect {
     property ShaderEffectSource source
     property ShaderEffectSource blurredSource
     property ShaderEffectSource bloomSource
+    property ShaderEffectSource longBurnInSource
 
     property color fontColor: appSettings.fontColor
     property color backgroundColor: appSettings.backgroundColor
     property real bloom: appSettings.bloom * 2.5
 
     property real burnIn: appSettings.burnIn
+    property real longBurnIn: appSettings.longBurnIn
 
     property real jitter: appSettings.jitter * 0.007
     property real staticNoise: appSettings.staticNoise
@@ -174,6 +176,9 @@ ShaderEffect {
             uniform lowp float bloom;" : "") +
         (burnIn !== 0 ? "
             uniform sampler2D blurredSource;" : "") +
+        (longBurnIn !== 0 ? "
+            uniform lowp float longBurnIn;
+            uniform sampler2D longBurnInSource;" : "") +
         (staticNoise !== 0 ? "
             uniform highp float staticNoise;" : "") +
         (((staticNoise !== 0 || jitter !== 0 || rbgShift)
@@ -283,6 +288,11 @@ ShaderEffect {
             (burnIn !== 0 ? "
                 vec4 txt_blur = texture2D(blurredSource, txt_coords);
                 txt_color = txt_color + txt_blur.rgb * txt_blur.a;"
+            : "") +
+
+            (longBurnInSource !== 0 ? "
+                vec3 txt_long_burnin = texture2D(longBurnInSource, txt_coords).rgb;
+                txt_color = txt_color + txt_long_burnin * longBurnIn;"
             : "") +
 
              "float greyscale_color = rgb2grey(txt_color) + color;" +
