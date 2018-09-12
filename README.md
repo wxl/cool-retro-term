@@ -20,9 +20,13 @@ This terminal emulator works under Linux and macOS and requires Qt 5.2 or higher
 ## Get cool-retro-term
 You can either build cool-retro-term yourself (see below) or walk the easy way and install one of these packages:
 
+### Fedora
+
 Fedora has the `cool-retro-term` in the offcial repositories. All you have to do is `sudo dnf install cool-retro-term`.
 
 Users of openSUSE can grab a package from [Open Build Service](http://software.opensuse.org/package/cool-retro-term).
+
+### Arch
 
 Arch users can install this [package](https://aur.archlinux.org/packages/cool-retro-term-git/) directly via the [AUR](https://aur.archlinux.org):
 
@@ -33,6 +37,8 @@ or use:
     pacman -S cool-retro-term
 
 to install precompiled from community repository.
+
+### Gentoo
 
 Gentoo users can now install the second release "1.0.1" from a 3rd-party repository preferably via layman:
 
@@ -45,15 +51,27 @@ The live ebuild (version 9999-r1) tracking the bleeding-edge WIP codebase also r
 
 A word of warning: USE flags and keywords are to be added to portage's configuration files and every emerge operation should be executed with '-p' (short option for --pretend) appended to the command line first as per best practice!
 
-Ubuntu users of 14.04 LTS (Trusty) up to 15.10 (Wily) can use [this PPA](https://launchpad.net/~bugs-launchpad-net-falkensweb).
+### Ubuntu
 
-Ubuntu 17.10 can use [this PPA](https://launchpad.net/%7Evantuz/+archive/ubuntu/cool-retro-term)
+For recent releases of Ubuntu, including 17.10 (Artful Aardvark) and above, use [this PPA](https://launchpad.net/%7Evantuz/+archive/ubuntu/cool-retro-term) (thanks to [@vantuz](https://github.com/vantuz)):
+
+    sudo add-apt-repository ppa:vantuz/cool-retro-term
+    sudo apt update
+    sudo apt install cool-retro-term
+
+For older releases of Ubuntu, including 14.04 LTS (Trusty Tahr) up to 17.10 (Artful Aardvark), use [this PPA](https://launchpad.net/~bugs-launchpad-net-falkensweb) (thanks to [@tomchiverton](https://github.com/tomchiverton)):
+
+    sudo add-apt-repository ppa:bugs-launchpad-net-falkensweb/cool-retro-term
+    sudo apt update
+    sudo apt install cool-retro-term
+
+### macOS
 
 macOS users can grab the latest dmg from the release page: https://github.com/Swordfish90/cool-retro-term/releases
 
 ## Build instructions (Linux)
 
-## Dependencies
+### Dependencies
 Make sure to install these first.
 
 ---
